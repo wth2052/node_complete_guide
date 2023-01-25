@@ -1,4 +1,0 @@
-ejs는 이와같이 includes를 통해
-end,head,navigation등을 분리할수 있다 (코드가 깔끔해짐)
-includes는  반복해서 입력해야하는 단점이 있지만
-공유된 코드로인해 코드가 깔끔해진다.
