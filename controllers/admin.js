@@ -35,7 +35,7 @@ exports.getEditProduct = (req, res, next) => {
       return res.redirect('/');
     }
     res.render('admin/edit-product', {
-      pageTitle: 'Edit Product',
+      pageTitle: '포켓몬 정보 수정',
       path: '/admin/edit-product',
       editing: editMode,
       product: product
@@ -66,8 +66,14 @@ exports.getProducts = (req, res) => {
   Product.fetchAll(products => {
     res.render('admin/products', {
       prods: products,
-      pageTitle: 'Admin Products',
+      pageTitle: '관리자 메뉴',
       path: '/admin/products'
     });
   });
 };
+
+exports.postDeleteProduct = (req, res, next) => {
+  const prodId = req.body.productId;
+  Product.deleteById(prodId);
+  res.redirect('/admin/products');
+}

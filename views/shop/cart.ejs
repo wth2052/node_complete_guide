@@ -3,4 +3,23 @@
 
     <body>
         <%- include('../includes/navigation.ejs') %>
+
+        <main>
+            <% if (products.length > 0) {%>
+                <ul>
+                    <% products.forEach(p => { %>
+<!--                 p = 백엔드 코드중 cartProducts 배열에 넘긴 객체.  -->
+                        <li>
+                            <p><%= p.productData.title %> (<%= p.qty %>)</p>
+                            <form action="/cart-delete-item" method="POST">
+                                <input type="hidden" value="<%= p.productData.id %>" name="productId">
+                                <button class="btn" type="submit">삭제</button>
+                            </form>
+                        </li>
+                    <% });  %>
+                </ul>
+                <%} else {%>
+                <h1>어떠한 상품도 장바구니에 없습니다.</h1>
+                <%} %>
+        </main>
         <%- include('../includes/end.ejs') %>

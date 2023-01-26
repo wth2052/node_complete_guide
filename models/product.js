@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const e = require("express");
-
+const Cart = require('./cart')
 const p = path.join(
   path.dirname(process.mainModule.filename),
   'data',
@@ -17,6 +16,7 @@ const getProductsFromFile = cb => {
     }
   });
 };
+
 
 module.exports = class Product {
   constructor(id, title, imageUrl, description, price) {
@@ -51,7 +51,21 @@ module.exports = class Product {
       }
     });
   }
+  //삭제
+  static deleteById(id) {
+    getProductsFromFile(products => {
+      const product = products.find(prod => prod.id === id);
+      //익명 함수, 함수 반환 기준에 맞지 않는 요소를 새로운 배열로써 반환.
+      //삭제하려는 ID와 다른 ID를 가진 모든 요소를 유지해 새로운 배열로써 반환된다.
+      const updatedProducts = products.filter(prod => prod.id !== id);
+      fs.writeFile(p, JSON.stringify(updatedProducts),err => {
+        if(!err){
+          Cart.deleteProduct(id, product.price);
+        }
+      });
+    });
 
+  }
   static fetchAll(cb) {
     getProductsFromFile(cb);
   }
@@ -62,6 +76,4 @@ module.exports = class Product {
       cb(product);
     });
   }
-
-
 };
