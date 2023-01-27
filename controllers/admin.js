@@ -16,8 +16,11 @@ exports.postAddProduct = (req, res, next) => {
   //null이 추가된 이유 : 생성자에 this를 추가 인수로 추가했기 때문,
   //이부분이 null인경우  models/product의 확인로직이 실패하여 새로운 제품 생성 모드로 진입함.
   const product = new Product(null, title, imageUrl, description, price);
-  product.save();
-  res.redirect('/');
+  product.save()
+    .then(() => {
+      res.redirect('/')
+    })
+    .catch(err => console.log(err));
 };
 
 
