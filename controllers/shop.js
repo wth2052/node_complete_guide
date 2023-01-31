@@ -13,13 +13,6 @@ exports.getProducts = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
-  // Product.findAll({where: {id : prodId}})
-  //   .then(products => {
-  //     res.render('shop/product-detail', {
-  //       product: products[0],
-  //       pageTitle: products[0].title,
-  //       path: '/products'
-  //     });
   Product.findById(prodId)
     .then(product => {
       res.render('shop/product-detail', {
@@ -28,8 +21,9 @@ exports.getProduct = (req, res, next) => {
         path: '/products'
       });
     })
-  .catch(err => console.log(err));
+    .catch(err => console.log(err));
 };
+
 
 exports.getIndex = (req, res, next) => {
  //구조분해 인수목록에 인수로서 수신하는 값의 정보를 끌어낼 수 있는 기능
@@ -41,26 +35,22 @@ exports.getIndex = (req, res, next) => {
       path: '/'
     })
   })
+    .catch(err => {
+      console.log(err);
+    });
 };
 
 
 exports.getCart = (req, res, next) => {
   req.user
     .getCart()
-    .then(cart => {
-      console.log(cart);
-      return cart.getProducts()
-        .then(products => {
+    .then(products => {
               res.render('shop/cart', {
                 path: '/cart',
                 pageTitle: '내 장바구니',
                 products: products
               });
         })
-        .catch(err => {
-          console.log(err)
-        });
-    })
     .catch(err => console.log(err));
 };
 
@@ -68,45 +58,12 @@ exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findById(prodId)
     .then(product => {
-      return req.user.addToCart(product);
-    })
+    return req.user.addToCart(product)
+  })
     .then(result => {
-      console.log(result);
-      res.redirect('/cart');
-    });
-
-  // let fetchedCart;
-  // let newQuantity = 1;
-  // req.user
-  //   .getCart()
-  //   .then(cart => {
-  //     fetchedCart = cart;
-  //     return cart.getProducts({ where: { id: prodId } });
-  //   })
-  //   .then(products => {
-  //     //만약 제품이 있다면 변수에 값을 지정, 없으면 undefined
-  //     let product;
-  //     if (products.length > 0) {
-  //       product = products[0];
-  //     }
-  //
-  //     if (product) {
-  //       const oldQuantity = product.cartItem.quantity;
-  //       newQuantity = oldQuantity + 1;
-  //       return product;
-  //     }
-  //     return Product.findByPk(prodId);
-  //   })
-  //   .then(product => {
-  //     return fetchedCart.addProduct(product, {
-  //       through: { quantity: newQuantity }
-  //     });
-  //   })
-  //   .then(() => {
-  //     res.redirect('/cart');
-  //   })
-  //   .catch(err => console.log(err));
+    console.log(result)})
 };
+
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;

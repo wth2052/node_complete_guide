@@ -4,19 +4,19 @@
     <nav class="main-header__nav">
         <ul class="main-header__item-list">
             <li class="main-header__item">
-                <a class="<%= path === '/' ? 'active' : '' %>" href="/">상점</a>
+                <a class="<%= path === '/' ? 'active' : '' %>" href="/">포켓몬 상점</a>
             </li>
             <li class="main-header__item">
-                <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">포켓몬</a>
+                <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">포켓몬 보기</a>
             </li>
             <li class="main-header__item">
-                <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">카트</a>
+                <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">장바구니</a>
             </li>
             <li class="main-header__item">
-                <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">주문</a>
+                <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">주문 보기</a>
             </li>
             <li class="main-header__item">
-                <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">포켓몬 추가
+                <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">포켓몬 등록
                 </a>
             </li>
             <li class="main-header__item">
@@ -28,26 +28,26 @@
 </header>
 
 <nav class="mobile-nav">
-        <ul class="mobile-nav__item-list">
-                <li class="mobile-nav__item">
-                    <a class="<%= path === '/' ? 'active' : '' %>" href="/">Shop</a>
-                </li>
-                <li class="mobile-nav__item">
-                    <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">Products</a>
-                </li>
-                <li class="mobile-nav__item">
-                    <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">Cart</a>
-                </li>
-                <li class="mobile-nav__item">
-                    <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">Orders</a>
-                </li>
-                <li class="mobile-nav__item">
-                    <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">Add Product
-                    </a>
-                </li>
-                <li class="mobile-nav__item">
-                    <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">Admin Products
-                    </a>
-                </li>
-            </ul>
+    <ul class="mobile-nav__item-list">
+        <li class="mobile-nav__item">
+            <a class="<%= path === '/' ? 'active' : '' %>" href="/">Shop</a>
+        </li>
+        <li class="mobile-nav__item">
+            <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">포켓몬</a>
+        </li>
+        <li class="mobile-nav__item">
+            <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">장바구니</a>
+        </li>
+        <li class="mobile-nav__item">
+            <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">주문</a>
+        </li>
+        <li class="mobile-nav__item">
+            <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">포켓몬 추가
+            </a>
+        </li>
+        <li class="mobile-nav__item">
+            <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">관리자 메뉴
+            </a>
+        </li>
+    </ul>
 </nav>

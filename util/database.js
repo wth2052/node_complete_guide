@@ -2,8 +2,8 @@ const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
 
 let _db;
-const mongoConnect = (callback) => {``
-MongoClient.connect('mongodb+srv://root:3d720307@cluster0.w2bgbed.mongodb.net/shop?retryWrites=true', )
+const mongoConnect = (callback) => {
+MongoClient.connect('mongodb+srv://root:3d720307@cluster0.w2bgbed.mongodb.net/shop?retryWrites=true')
   .then(client => {
     console.log('몽고DB와 성공적으로 연결되었습니다.');
     _db = client.db();
