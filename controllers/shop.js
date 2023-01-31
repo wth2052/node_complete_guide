@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const Order = require('../models/order');
 //제품을 찾은 후
 //장바구니를 정리하는 과정을
 //주기별로 진행하기도 함. (애플리케이션에서)
@@ -106,35 +107,44 @@ exports.postCartDeleteProduct = (req, res, next) => {
     //요청을 통해 ID를 검색하면 백엔드에서 모든 데이터를 검색해야 하기 때문.
 };
 
+
 exports.postOrder = (req, res, next) => {
-  let fetchedCart;
   req.user
-    .addOrder()
+    .populate('cart.items.productId')
+    .execPopulate()
+    .then(user => {
+      const products = user.cart.items.map(i => {
+        return { quantity: i.quantity, product: { ...i.productId._doc } };
+      });
+      const order = new Order({
+        user: {
+          name: req.user.name,
+          userId: req.user
+        },
+        products: products
+      });
+      return order.save();
+    })
     .then(result => {
+      return req.user.clearCart();
+    })
+    .then(() => {
       res.redirect('/orders');
     })
     .catch(err => console.log(err));
 };
 
 exports.getOrders = (req, res, next) => {
-  //products인 이유 : app.js에서 Order와 Product간의 관계를 설정하였고
-  //Sequelize가 이름을 복수로 만들어 Eager Loading라는 개념을 통해
-  //Sequelize가 orders를 가져올때 관련된 products까지 가져와서
-  //주문과 주문에 해당하는 제품을 포함한 배열을 제공하도록 하는것
-  //orders products 사이의 관계를 설정해두었기 때문에 둘을 함께 로딩할 수 있는것이다.
-
-  req.user.getOrders()
+  Order.find({'user.userId': req.user._id})
     .then(orders => {
-    res.render('shop/orders', {
-      path: '/orders',
-      pageTitle: '주문',
-      orders: orders
-    });
-  })
+      res.render('shop/orders', {
+        path: '/orders',
+        pageTitle: '주문',
+        orders: orders
+      });
+    })
     .catch(err => console.log(err))
-
 };
-
 
 
 exports.getCheckout = (req, res, next) => {
