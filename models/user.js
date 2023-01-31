@@ -45,6 +45,7 @@ class User {
   }
   getCart() {
     const db = getDb();
+    //map으로 모든 제품을 살펴봄
     const productIds = this.cart.items.map(i => {
       return i.productId;
     });
@@ -56,6 +57,7 @@ class User {
         return products.map(p => {
           return {
             ...p,
+            //find는 제품 객체만을 전달하지만 수량도 전달할것.(보유중 장바구니 품목에서 나온 제품의 수량을 추출함.quantity)
             quantity: this.cart.items.find(i => {
               return i.productId.toString() === p._id.toString();
             }).quantity
@@ -65,15 +67,22 @@ class User {
   }
 
   deleteItemFromCart(productId) {
+    //더 쉬운방법 : this.cart.items.filter()
+    //filter는 배열의 요소를 필터링하는 방식에 대한 기준을 정의할수 있게 해준다.
+    //품목 배열 요소
+    //모든 필터링된 품목을 담은 새로운 배열을 반환한다.
     const updatedCartItems = this.cart.items.filter(item => {
+      //품목을 제거하려면 false를 반환해야함
+      //이유 : 품목을 담기 위해서는 true를 반환하기 때문
       return item.productId.toString() !== productId.toString();
     });
+    //이로써 장바구니에 삭제한 걸 제외한 모든 품목들이 있도록 업데이트 됨
     const db = getDb();
     return db
       .collection('users')
       .updateOne(
-        { _id: new ObjectId(this._id) },
-        { $set: { cart: {items: updatedCartItems} } }
+        { _id: new ObjectId(this._id)},
+        { $set: { cart: {items: updatedCartItems}}}
       );
   }
 
