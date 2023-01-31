@@ -1,4 +1,22 @@
 const Product = require('../models/product');
+//제품을 찾은 후
+//장바구니를 정리하는 과정을
+//주기별로 진행하기도 함. (애플리케이션에서)
+
+//혹은
+
+//Cart 페이지를 로딩할 때, 즉
+//user.js에서 getCart를 호출할 때
+//user 객체에 this.cart.items가 있는데
+//그에 따라 받는 제품 배열은 비어있으면 장바구니에 있는 제품과
+//데이터베이스에 있는 제품이 일치하지 않게 된다.
+// = 뒤에서 요청을 보내야함
+//장바구니를 업데이트할 때 사용했던 툴을 이용해
+//데이터베이스 데이터와 일치시킴
+//빈 제품 배열을 받았는데
+//장바구니에 제품이 있다면 장바구니를 초기화, 데이터베이스로부터 받은 데이터에 장바구니에 있는 것보다 제품이 적다면
+//어떤 차이가 있는지 보고 장바구니를 알맞게 업데이트하는 방법을 사용.
+
 
 exports.getProducts = (req, res, next) => {
   Product.fetchAll()
@@ -58,14 +76,13 @@ exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findById(prodId)
     .then(product => {
-    return req.user.addToCart(product)
-  })
+      return req.user.addToCart(product);
+    })
     .then(result => {
-    console.log(result)})
-    res.redirect('/cart')
-
+      console.log(result);
+      res.redirect('/cart');
+    });
 };
-
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
@@ -82,35 +99,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 exports.postOrder = (req, res, next) => {
   let fetchedCart;
   req.user
-    .getCart()
-    .then(cart => {
-      fetchedCart = cart;
-      return cart.getProducts();
-
-    })
-    .then(products => {
-      let fetchedCart;
-      return req.user
-        .createOrder()
-        .then(order => {
-          //products를 통해 추가하지만
-          // 각각의 제품이 특수 키 혹은 필드를 가져 Sequelize가 이해하도록 해야한다. (map 사용하여 배열로 리턴)
-          order.addProducts(products.map(product => {
-            // 이때 order-item 모델에 정의할때 그대로 사용해야한다
-            //장바구니와 연관된 테이블 이름 다음은 quantity를 입력하면
-            //cart에서 quantity를 받고 orderItem에 받고 다음줄에서 반환됨.
-            //그럼 products 배열에 기존 제품 데이터와 같이 order에 대한 quantity 정보가 있다.
-            // 해당 정보에 따라 addProducts가 quantity만큼 order에 추가한다
-              product.orderItem = { quantity: product.cartItem.quantity };
-              return product;
-            })
-          );
-        })
-        .catch(err => console.log(err));
-    })
-    .then(result => {
-      return fetchedCart.setProducts(null);
-    })
+    .addOrder()
     .then(result => {
       res.redirect('/orders');
     })
@@ -124,11 +113,11 @@ exports.getOrders = (req, res, next) => {
   //주문과 주문에 해당하는 제품을 포함한 배열을 제공하도록 하는것
   //orders products 사이의 관계를 설정해두었기 때문에 둘을 함께 로딩할 수 있는것이다.
 
-  req.user.getOrders({include: ['products']})
+  req.user.getOrders()
     .then(orders => {
     res.render('shop/orders', {
       path: '/orders',
-      pageTitle: 'Your Orders',
+      pageTitle: '주문',
       orders: orders
     });
   })

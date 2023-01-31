@@ -85,6 +85,44 @@ class User {
         { $set: { cart: {items: updatedCartItems}}}
       );
   }
+  //주문내역은 길어지므로 새 컬렉션을 만들어야함
+  addOrder() {
+    const db = getDb();
+    return this.getCart()
+      .then(products => {
+        const order = {
+          items: products,
+          //주문에 대한 정보를 많이 저장하면(가격.. 등) 좋음
+          user: {
+            _id: new ObjectId(this._id),
+            name: this.name,
+          }
+        };
+        return db.collection('orders').insertOne(order);
+      })
+        //주문에 성공했다면, 이때 장바구니를 비운다
+        .then(result => {
+          this.cart = {items: [] };
+          //그와 동시에 db에 있는 장바구니도 같이 비운다.
+          return db
+            .collection('users')
+            .updateOne(
+              { _id: new ObjectId(this._id)},
+              { $set: { cart: {items: []}}}
+            );
+        });
+  }
+
+  getOrders() {
+    const db = getDb();
+    //따옴표 안에 경로 쓸것
+     return db
+       .collection('orders')
+       .find({ 'user._id': new ObjectId(this._id) })
+       //사용자의 주문 배열을 반환해라.
+       .toArray();
+  }
+
 
   static findById(userId) {
     const db = getDb();
