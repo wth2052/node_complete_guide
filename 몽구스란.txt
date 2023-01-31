@@ -1,0 +1,31 @@
+ODM
+Object-Document Mapping Library
+
+Sequelize?
+ORM
+Object Relational Mapping Library
+
+
+MongoDB가
+단순히 관계형 데이터베이스가 아니라
+문서형 데이터베이스로 문서 관점으로 실행되는 ODM이다,
+
+둘 다 애플리케이션에 데이터와 사용자 개체가 있으며
+이를 컬렉션에 저장한다는 점에는 같음
+
+-> JavaScript 객체를 컬렉션 문서에 맵핑하게 된다
+
+Mongoose의 핵심 개념
+
+스키마와 모델을 다뤄
+데이터가 어떻게 보일지 정의
+
+인스턴스로 모델에 예시를 정함
+-> 계획에 따라 JavaScript 객체를 생성할수 있게 해줌
+
+--여기까지 설정을 마치면--
+User 객체 및 모델을 통해 데이터베이스에 쿼리를 실행 가능.
+
+Mongoose의 다양한 기능들을 활용해 구문을 만들 수 있다
+
+스키마를 기반으로 객체에 호출도 가능

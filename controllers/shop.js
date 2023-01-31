@@ -19,8 +19,11 @@ const Product = require('../models/product');
 
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  //cursor대신 products를 반환 \
+  //  Product.find().cursor().eachAsync() 등도 가능
+  Product.find()
     .then(products => {
+      console.log(products)
       res.render('shop/product-list', {
         prods: products,
         pageTitle: '전체 포켓몬',
@@ -31,6 +34,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
+  //findById로 문자열을 전달시, Mongoose가 알아서 ObjectId로 변환함 WOW!
   Product.findById(prodId)
     .then(product => {
       res.render('shop/product-detail', {
@@ -44,9 +48,12 @@ exports.getProduct = (req, res, next) => {
 
 
 exports.getIndex = (req, res, next) => {
- //구조분해 인수목록에 인수로서 수신하는 값의 정보를 끌어낼 수 있는 기능
-  Product.fetchAll()
+ //몽구스는 find를 쓰면 배열을 출력한다.
+  //많은 양의 쿼리를 사용시 cursor() 검색하는 데이터셋을 제한해야한다.
+  // = 페이지네이션
+  Product.find()
     .then(products => {
+      console.log(products)
     res.render('shop/index', {
       prods: products,
       pageTitle: 'Shop',
@@ -61,8 +68,11 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
   req.user
-    .getCart()
-    .then(products => {
+    .populate('cart.items.productId')
+    .execPopulate()
+    .then(user => {
+      console.log(user.cart.items)
+      const products = user.cart.items
               res.render('shop/cart', {
                 path: '/cart',
                 pageTitle: '내 장바구니',
@@ -87,8 +97,8 @@ exports.postCart = (req, res, next) => {
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   req.user
-    .deleteItemFromCart(prodId)
-    .then(cart => {
+    .removeFromCart(prodId)
+    .then(result => {
       res.redirect('/cart')
   })
     .catch(err => console.log(err))

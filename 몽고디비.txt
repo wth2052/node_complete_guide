@@ -7,3 +7,7 @@ $in $set과같은 연산자가 있고..
 
 NoSQL의 MongoDB는 Node.js와 함께 사용
 JavaScript객체를 사용하기 떄문.
+
+
+SQL에 Sequelize가 있다면
+MongoDB에는 Mongoose가 있다
