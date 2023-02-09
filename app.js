@@ -36,7 +36,9 @@ app.use((req, res, next) => {
       //-> 사용자 간에도 공유된다.
       // 쿠키는데이터가 해당 사용자에게 맞춤화되어 다른 사용자에 영향을 끼치지 않음
       //쿠키는 요청과 함께 보내지면서 사용자가 이미 인증되었다고 알려줌
-      req.user = user
+      
+      //헤더설정, 쿠키를 설정하는 예약명
+      res.setHeader('set-Cookie', 'loggedIn=true');
       next();
     })
     .catch(err => console.log(err));
