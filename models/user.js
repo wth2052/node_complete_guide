@@ -33,43 +33,43 @@ const userSchema = new Schema({
 //즉 품목의 빈 배열 또는 실제 품목이 있는 품목 배열로
 //채워져있는 장바구니를 보유한 객체를 대상으로 호출이 될것이다.
 userSchema.methods.addToCart = function(product) {
-    const cartProductIndex = this.cart.items.findIndex(cp => {
-      return cp.productId.toString() === product._id.toString();
+  const cartProductIndex = this.cart.items.findIndex(cp => {
+    return cp.productId.toString() === product._id.toString();
+  });
+  let newQuantity = 1;
+  const updatedCartItems = [...this.cart.items];
+
+  if (cartProductIndex >= 0) {
+    newQuantity = this.cart.items[cartProductIndex].quantity + 1;
+    updatedCartItems[cartProductIndex].quantity = newQuantity;
+  } else {
+    updatedCartItems.push({
+      productId: product._id,
+      quantity: newQuantity
     });
-    let newQuantity = 1;
-    const updatedCartItems = [...this.cart.items];
-
-    if (cartProductIndex >= 0) {
-      newQuantity = this.cart.items[cartProductIndex].quantity + 1;
-      updatedCartItems[cartProductIndex].quantity = newQuantity;
-    } else {
-      updatedCartItems.push({
-          //new Object ()를 지우면 Mongoose가 ObjectId에 자동으로 포함 시킨다.
-          productId: product._id,
-          quantity: newQuantity
-        });
-    }
-    const updatedCart = {
-      items: updatedCartItems
-    };
-    this.cart = updatedCart;
-    return this.save();
-  };
-
-  userSchema.methods.removeFromCart = function (productId) {
-    const updatedCartItems = this.cart.items.filter(item => {
-      //       //품목을 제거하려면 false를 반환해야함
-      //       //이유 : 품목을 담기 위해서는 true를 반환하기 때문
-            return item.productId.toString() !== productId.toString();
-          });
-    this.cart.items = updatedCartItems;
-    return this.save();
   }
-
-  userSchema.methods.clearCart = function() {
-    this.cart = { items: [] };
-    return this.save();
+  const updatedCart = {
+    items: updatedCartItems
   };
+  this.cart = updatedCart;
+  return this.save();
+};
+
+
+userSchema.methods.removeFromCart = function (productId) {
+  const updatedCartItems = this.cart.items.filter(item => {
+    //       //품목을 제거하려면 false를 반환해야함
+    //       //이유 : 품목을 담기 위해서는 true를 반환하기 때문
+    return item.productId.toString() !== productId.toString();
+  });
+  this.cart.items = updatedCartItems;
+  return this.save();
+}
+
+userSchema.methods.clearCart = function() {
+  this.cart = { items: [] };
+  return this.save();
+};
 module.exports = mongoose.model('User', userSchema);
 // const mongodb = require('mongodb');
 // const getDb = require('../util/database').getDb;

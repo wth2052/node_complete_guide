@@ -4,33 +4,40 @@
     <nav class="main-header__nav">
         <ul class="main-header__item-list">
             <li class="main-header__item">
-                <a class="<%= path === '/' ? 'active' : '' %>" href="/">포켓몬 상점</a>
+                <a class="<%= path === '/' ? 'active' : '' %>" href="/">상점</a>
             </li>
             <li class="main-header__item">
-                <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">포켓몬 보기</a>
+                <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">제품</a>
             </li>
-            <li class="main-header__item">
-                <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">장바구니</a>
-            </li>
-            <li class="main-header__item">
-                <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">주문 보기</a>
-            </li>
-            <% if (isAuthenticated) {%>
-             <li class="main-header__item">
-                <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">제품 추가
-                </a>
-            </li>
-            <li class="main-header__item">
-                <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">관리자 메뉴
-                </a>
-            </li>
+            <% if (isAuthenticated) { %>
+                <li class="main-header__item">
+                    <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">장바구니</a>
+                </li>
+                <li class="main-header__item">
+                    <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">주문</a>
+                </li>
+                <li class="main-header__item">
+                    <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">제품 추가
+                    </a>
+                </li>
+                <li class="main-header__item">
+                    <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">관리자 메뉴
+                    </a>
+                </li>
             <% } %>
         </ul>
         <ul class="main-header__item-list">
-            <li class="main-header__item">
-                <a class="<%= path === '/login' ? 'active' : ''%>" href="/login">Login</a>
-            </li>
-        </ul>
+            <% if (!isAuthenticated) { %>
+                <li class="main-header__item">
+                    <a class="<%= path === '/login' ? 'active' : '' %>" href="/login">로그인</a>
+                </li>
+            <% } else { %>
+                <li class="main-header__item">
+                    <form action="/logout" method="post">
+                        <button type="submit">로그아웃</button>
+                    </form>
+                </li>
+            <% } %>
         </ul>
     </nav>
 </header>
@@ -41,20 +48,20 @@
             <a class="<%= path === '/' ? 'active' : '' %>" href="/">Shop</a>
         </li>
         <li class="mobile-nav__item">
-            <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">포켓몬</a>
+            <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">Products</a>
         </li>
         <li class="mobile-nav__item">
-            <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">장바구니</a>
+            <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">Cart</a>
         </li>
         <li class="mobile-nav__item">
-            <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">주문</a>
+            <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">Orders</a>
         </li>
         <li class="mobile-nav__item">
-            <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">포켓몬 추가
+            <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">제품 추가
             </a>
         </li>
         <li class="mobile-nav__item">
-            <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">관리자 메뉴
+            <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">운영자 제품
             </a>
         </li>
     </ul>

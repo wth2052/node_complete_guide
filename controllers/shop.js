@@ -29,7 +29,7 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: '전체 포켓몬',
         path: '/products',
-        isAuthenticated: req.isLoggedIn
+        isAuthenticated: req.session.isLoggedIn
       });
     })
 };
@@ -43,7 +43,7 @@ exports.getProduct = (req, res, next) => {
         product: product,
         pageTitle: product.title,
         path: '/products',
-        isAuthenticated: req.isLoggedIn
+        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch(err => console.log(err));
@@ -51,19 +51,19 @@ exports.getProduct = (req, res, next) => {
 
 
 exports.getIndex = (req, res, next) => {
- //몽구스는 find를 쓰면 배열을 출력한다.
+  //몽구스는 find를 쓰면 배열을 출력한다.
   //많은 양의 쿼리를 사용시 cursor() 검색하는 데이터셋을 제한해야한다.
   // = 페이지네이션
   Product.find()
     .then(products => {
       console.log(products)
-    res.render('shop/index', {
-      prods: products,
-      pageTitle: 'Shop',
-      path: '/',
-      isAuthenticated: req.isLoggedIn
+      res.render('shop/index', {
+        prods: products,
+        pageTitle: 'Shop',
+        path: '/',
+        isAuthenticated: req.session.isLoggedIn
+      })
     })
-  })
     .catch(err => {
       console.log(err);
     });
@@ -77,13 +77,13 @@ exports.getCart = (req, res, next) => {
     .then(user => {
       console.log(user.cart.items)
       const products = user.cart.items
-              res.render('shop/cart', {
-                path: '/cart',
-                pageTitle: '내 장바구니',
-                products: products,
-                isAuthenticated: req.isLoggedIn
-              });
-        })
+      res.render('shop/cart', {
+        path: '/cart',
+        pageTitle: '내 장바구니',
+        products: products,
+        isAuthenticated: req.session.isLoggedIn
+      });
+    })
     .catch(err => console.log(err));
 };
 
@@ -105,10 +105,10 @@ exports.postCartDeleteProduct = (req, res, next) => {
     .removeFromCart(prodId)
     .then(result => {
       res.redirect('/cart')
-  })
+    })
     .catch(err => console.log(err))
-    //hidden input으로 가격을 백엔드로 전달가능하지만 이게 더 깔끔한 방법.
-    //요청을 통해 ID를 검색하면 백엔드에서 모든 데이터를 검색해야 하기 때문.
+  //hidden input으로 가격을 백엔드로 전달가능하지만 이게 더 깔끔한 방법.
+  //요청을 통해 ID를 검색하면 백엔드에서 모든 데이터를 검색해야 하기 때문.
 };
 
 
@@ -139,23 +139,14 @@ exports.postOrder = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  Order.find({'user.userId': req.user._id})
+  Order.find({ 'user.userId': req.user._id })
     .then(orders => {
       res.render('shop/orders', {
         path: '/orders',
         pageTitle: '주문',
         orders: orders,
-        isAuthenticated: req.isLoggedIn
+        isAuthenticated: req.session.isLoggedIn
       });
     })
-    .catch(err => console.log(err))
-};
-
-
-exports.getCheckout = (req, res, next) => {
-  res.render('shop/checkout', {
-    path: '/checkout',
-    pageTitle: 'Checkout',
-    isAuthenticated: req.isLoggedIn
-  });
+    .catch(err => console.log(err));
 };

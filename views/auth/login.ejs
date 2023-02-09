@@ -7,16 +7,15 @@
 <%- include('../includes/navigation.ejs') %>
 
 <main>
-    <form class="login-form" action="/login">
+    <form class="login-form" action="/login" method="POST">
         <div class="form-control">
-            <label for="title">이메일 주소</label>
+            <label for="email">이메일</label>
             <input type="email" name="email" id="email">
         </div>
         <div class="form-control">
-            <label for="imageUrl">비밀번호</label>
+            <label for="password">비밀번호</label>
             <input type="password" name="password" id="password">
         </div>
-
         <button class="btn" type="submit">로그인</button>
     </form>
 </main>
