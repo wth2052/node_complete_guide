@@ -4,11 +4,11 @@ const Schema = mongoose.Schema
 
 //JavaScript객체를 이 생성자로 전달한다.
 const userSchema = new Schema({
-  name: {
+  email: {
     type: String,
     required: true
   },
-  email: {
+  password: {
     type: String,
     required: true
   },
