@@ -1,11 +1,13 @@
 const Product = require('../models/product');
 
 exports.getAddProduct = (req, res, next) => {
+  if (!req.session.isLoggedIn) {
+    return res.redirect('/login');
+  }
   res.render('admin/edit-product', {
     pageTitle: '포켓몬 추가',
     path: '/admin/add-product',
     editing: false,
-    isAuthenticated: req.session.isLoggedIn
   });
 };
 
@@ -59,7 +61,6 @@ exports.getEditProduct = (req, res, next) => {
         path: '/admin/edit-product',
         editing: editMode,
         product: product,
-        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch(err => console.log(err));
@@ -73,6 +74,9 @@ exports.postEditProduct = (req, res, next) => {
   const updatedDesc = req.body.description;
 
   Product.findById(prodId).then(product => {
+    if(product.userId.toString() !== req.user._id.toString()) {
+      return res.redirect('/');
+    }
     product.title = updatedTitle;
     product.price = updatedPrice;
     product.description = updatedDesc;
@@ -88,13 +92,12 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  Product.find({userId: req.user._id})
     //이처럼 products가 들어간 then에서 제품들을 loop한후 findbyId 등.. 받은 ID로 사용자를 가져오는 쿼리를 입력해주면되긴 하는데 좀 번거롭다
     //find 다음에 populate 라는 메서드를 붙일수있다.
     //이는 Mongoose에게 특정 필드에 ID뿐만 아니라
     //모든 세부 정보를 채우도록 알리는 기능을 가지고있다.
     //.select('title price -_id')
-
     //.populateo('userId')
     //2번째 인자에 'name'를 전달하면 이름을 가져오겠다는 문자열이 됨.
     //ID는 명시안해두면 항상 검색함.
@@ -104,7 +107,6 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: 'Admin Products',
         path: '/admin/products',
-        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch(err => console.log(err));
@@ -112,7 +114,8 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.findByIdAndDelete(prodId)
+  //두개다 참이여야함, 아니면 삭제안됨
+  Product.deleteOne({_id: prodId, userId: req.user._id})
     .then(() => {
       console.log('포켓몬이 정상적으로 삭제되었습니다.');
       res.redirect('/admin/products');
