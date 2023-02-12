@@ -4,14 +4,16 @@ const Schema = mongoose.Schema
 
 //JavaScript객체를 이 생성자로 전달한다.
 const userSchema = new Schema({
-  name: {
-    type: String,
-    required: true
-  },
   email: {
     type: String,
     required: true
   },
+  password: {
+    type: String,
+    required: true
+  },
+  resetToken: String,
+  resetTokenExpiration: Date,
   cart: {
     //배열이 될것임
     //productId의 유형은 스키마로부터 가져와야한다.

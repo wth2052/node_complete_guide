@@ -5,7 +5,10 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
-
+const csrf =  require('csurf');
+const flash = require('connect-flash');
+//아래 소스코드는 허가되지 않은 인증서를 거부하지 않겠다는 의미
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 mongoose.set('strictQuery', true)
 
 const errorController = require('./controllers/error');
@@ -22,7 +25,8 @@ const store = new MongoDBStore({
   uri: MONGODB_URI,
   collection: 'sessions'
 });
-
+//{}로 무언가를 넣을수있음, 하지만 여기선 기본값인 세션으로 사용함
+const csrfProtection = csrf();
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -45,7 +49,11 @@ app.use(
     saveUninitialized: false,
     store: store
   })
-);
+)
+app.use(csrfProtection);
+//flash를 함수로 호출
+//애플리케이션이 request 객체에 사용가능
+app.use(flash())
 
 app.use((req, res, next) => {
   if (!req.session.user) {
@@ -63,7 +71,12 @@ app.use((req, res, next) => {
     })
     .catch(err => console.log(err));
 })
-
+app.use((req, res, next) => {
+  //렌더링될 뷰에만 존재하므로 locals
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+})
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
@@ -73,23 +86,8 @@ app.use(errorController.get404);
 mongoose
   .connect(MONGODB_URI)
   .then(result => {
-    //유저 생성자, 카트도 손에 쥐어준다!
-    //findOne에 인수를 제공 안하면, 발견하는 첫 사용자를 항상 리턴함.
-    User.findOne().then(user => {
-      //then에는 user 객체가 정의되지 않은경우에 새로운 사용자를 생성해라.
-      if(!user){
-        const user = new User({
-          name: 'Taehyeon',
-          email: 'taehyeon@test.com',
-          cart: {
-            items: []
-          }
-        });
-        user.save();
-      }
-    });
     app.listen(3000);
   })
   .catch(err => {
-    console.log(err)
-  })
+    console.log(err);
+  });
