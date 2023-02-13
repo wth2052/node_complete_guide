@@ -12,7 +12,7 @@
     <% } %>
     <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST">
         <div class="form-control">
-            <label for="title">Title</label>
+            <label for="title">포켓몬 이름</label>
             <input
                     class="<%= validationErrors.find(e => e.param === 'title') ? 'invalid' : '' %>"
                     type="text"
@@ -21,7 +21,7 @@
                     value="<% if (editing || hasError) { %><%= product.title %><% } %>">
         </div>
         <div class="form-control">
-            <label for="imageUrl">Image URL</label>
+            <label for="imageUrl">이미지 주소</label>
             <input
                     class="<%= validationErrors.find(e => e.param === 'imageUrl') ? 'invalid' : '' %>"
                     type="text"
@@ -30,7 +30,7 @@
                     value="<% if (editing || hasError) { %><%= product.imageUrl %><% } %>">
         </div>
         <div class="form-control">
-            <label for="price">Price</label>
+            <label for="price">가격</label>
             <input
                     class="<%= validationErrors.find(e => e.param === 'price') ? 'invalid' : '' %>"
                     type="number"
@@ -40,7 +40,7 @@
                     value="<% if (editing || hasError) { %><%= product.price %><% } %>">
         </div>
         <div class="form-control">
-            <label for="description">Description</label>
+            <label for="description">내용</label>
             <textarea
                     class="<%= validationErrors.find(e => e.param === 'description') ? 'invalid' : '' %>"
                     name="description"
