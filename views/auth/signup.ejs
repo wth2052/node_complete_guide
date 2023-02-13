@@ -1,45 +1,45 @@
 <%- include('../includes/head.ejs') %>
-<link rel="stylesheet" href="/css/forms.css">
-<link rel="stylesheet" href="/css/auth.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
 
 <body>
-<%- include('../includes/navigation.ejs') %>
+   <%- include('../includes/navigation.ejs') %>
 
-<main>
-    <% if (errorMessage) { %>
-        <div class="user-message user-message--error"><%= errorMessage %></div>
-    <% } %>
-    <form class="login-form" action="/signup" method="POST" novalidate>
-        <div class="form-control">
-            <label for="email">이메일 주소</label>
-            <input
+    <main>
+        <% if (errorMessage) { %>
+            <div class="user-message user-message--error"><%= errorMessage %></div>
+        <% } %>
+        <form class="login-form" action="/signup" method="POST" novalidate>
+            <div class="form-control">
+                <label for="email">이메일 주소</label>
+                <input 
                     class="<%= validationErrors.find(e => e.param === 'email') ? 'invalid' : '' %>"
-                    type="email"
-                    name="email"
-                    id="email"
+                    type="email" 
+                    name="email" 
+                    id="email" 
                     value="<%= oldInput.email %>">
-        </div>
-        <div class="form-control">
-            <label for="password">비밀번호</label>
-            <input
+            </div>
+            <div class="form-control">
+                <label for="password">비밀번호</label>
+                <input 
                     class="<%= validationErrors.find(e => e.param === 'password') ? 'invalid' : '' %>"
-                    type="password"
-                    name="password"
-                    id="password"
+                    type="password" 
+                    name="password" 
+                    id="password" 
                     value="<%= oldInput.password %>">
-        </div>
-        <div class="form-control">
-            <label for="confirmPassword">비밀번호 확인</label>
-            <input
+            </div>
+            <div class="form-control">
+                <label for="confirmPassword">비밀번호 확인</label>
+                <input 
                     class="<%= validationErrors.find(e => e.param === 'confirmPassword') ? 'invalid' : '' %>"
-                    type="password"
-                    name="confirmPassword"
-                    id="confirmPassword"
+                    type="password" 
+                    name="confirmPassword" 
+                    id="confirmPassword" 
                     value="<%= oldInput.confirmPassword %>">
-        </div>
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <button class="btn" type="submit">회원가입</button>
-    </form>
-</main>
+            </div>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn" type="submit">회원가입</button>
+        </form>
+    </main>
 <%- include('../includes/end.ejs') %>

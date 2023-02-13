@@ -1,11 +1,12 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+
 const { validationResult } = require('express-validator/check');
 
 const Product = require('../models/product');
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
-    pageTitle: '포켓몬 정보 추가',
+    pageTitle: 'Add Product',
     path: '/admin/add-product',
     editing: false,
     hasError: false,
@@ -24,8 +25,8 @@ exports.postAddProduct = (req, res, next) => {
   if (!errors.isEmpty()) {
     console.log(errors.array());
     return res.status(422).render('admin/edit-product', {
-      pageTitle: '포켓몬 정보 추가',
-      path: '/admin/edit-product',
+      pageTitle: '포켓몬 추가',
+      path: '/admin/add-product',
       editing: false,
       hasError: true,
       product: {
@@ -40,7 +41,7 @@ exports.postAddProduct = (req, res, next) => {
   }
 
   const product = new Product({
-    _id : mongoose.Types.ObjectId('63e6004e81a74f24f0fab5b4'),
+    _id: new mongoose.Types.ObjectId('5badf72403fd8b5be0366e81'),
     title: title,
     price: price,
     description: description,
@@ -51,11 +52,25 @@ exports.postAddProduct = (req, res, next) => {
     .save()
     .then(result => {
       // console.log(result);
-      console.log('포켓몬이 정상적으로 등록되었습니다.');
+      console.log('Created Product');
       res.redirect('/admin/products');
     })
     .catch(err => {
-
+      // return res.status(500).render('admin/edit-product', {
+      //   pageTitle: 'Add Product',
+      //   path: '/admin/add-product',
+      //   editing: false,
+      //   hasError: true,
+      //   product: {
+      //     title: title,
+      //     imageUrl: imageUrl,
+      //     price: price,
+      //     description: description
+      //   },
+      //   errorMessage: 'Database operation failed, please try again.',
+      //   validationErrors: []
+      // });
+      res.redirect('/500');
     });
 };
 
@@ -71,7 +86,7 @@ exports.getEditProduct = (req, res, next) => {
         return res.redirect('/');
       }
       res.render('admin/edit-product', {
-        pageTitle: '포켓몬 정보 수정',
+        pageTitle: '포켓몬 수정 페이지',
         path: '/admin/edit-product',
         editing: editMode,
         product: product,
@@ -94,7 +109,7 @@ exports.postEditProduct = (req, res, next) => {
 
   if (!errors.isEmpty()) {
     return res.status(422).render('admin/edit-product', {
-      pageTitle: '포켓몬 정보 수정',
+      pageTitle: 'Edit Product',
       path: '/admin/edit-product',
       editing: true,
       hasError: true,
@@ -120,7 +135,7 @@ exports.postEditProduct = (req, res, next) => {
       product.description = updatedDesc;
       product.imageUrl = updatedImageUrl;
       return product.save().then(result => {
-        console.log('포켓몬이 정상적으로 수정되었습니다.');
+        console.log('포켓몬정보가 정상적으로 업데이트 되었습니다.');
         res.redirect('/admin/products');
       });
     })
@@ -135,7 +150,7 @@ exports.getProducts = (req, res, next) => {
       console.log(products);
       res.render('admin/products', {
         prods: products,
-        pageTitle: '(관리자) 제품관리',
+        pageTitle: '(관리자)제품 관리',
         path: '/admin/products'
       });
     })

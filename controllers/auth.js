@@ -16,17 +16,17 @@ const transporter = nodemailer.createTransport({
 });
 
 
-  //trim 공백제거
-  //split 기호를 기점으로 나눔
-  // const isLoggedIn = req
-  //     .get('Cookie')
-  //     .trim()
-  //     .split('=')[1];
-  //사용자를 식별하기위해 쿠키가 필요하지만, 민감한 정보는 서버에 저장이된다.
-  //==세션의 이점
+//trim 공백제거
+//split 기호를 기점으로 나눔
+// const isLoggedIn = req
+//     .get('Cookie')
+//     .trim()
+//     .split('=')[1];
+//사용자를 식별하기위해 쿠키가 필요하지만, 민감한 정보는 서버에 저장이된다.
+//==세션의 이점
 
-  //오류 알림을 세션에 담음,
-  //세션에 잠깐 띄웠다가 보내고 사라지게
+//오류 알림을 세션에 담음,
+//세션에 잠깐 띄웠다가 보내고 사라지게
 
 exports.getLogin = (req, res, next) => {
   let message = req.flash('error');
@@ -167,22 +167,22 @@ exports.postSignup = (req, res, next) => {
           </div>`,
     text: "인증메일입니다.",
   };
-      bcrypt
-        .hash(password, 12)
-        .then(hashedPassword => {
-          const user = new User({
-            email: email,
-            password: hashedPassword,
-            cart: { items: [] }
-          });
-          return user.save();
-        })
-        .then(result => {
-          res.redirect('/login');
-          const info = transporter.sendMail(mailOptions);
-          console.log(info)
-          return info
-        })
+  bcrypt
+    .hash(password, 12)
+    .then(hashedPassword => {
+      const user = new User({
+        email: email,
+        password: hashedPassword,
+        cart: { items: [] }
+      });
+      return user.save();
+    })
+    .then(result => {
+      res.redirect('/login');
+      const info = transporter.sendMail(mailOptions);
+      console.log(info)
+      return info
+    })
     .catch(err => {
       console.log(err);
     });
@@ -194,59 +194,59 @@ exports.postLogout = (req, res, next) => {
     res.redirect('/');
   });
 }
-  exports.getReset = (req, res, next) => {
-    let message = req.flash('error');
-    if (message.length > 0) {
-      message = message[0];
-    } else {
-      message = null;
-    }
-    res.render('auth/reset', {
-      path: '/reset',
-      pageTitle: '패스워드 찾기',
-      errorMessage: message
-    });
+exports.getReset = (req, res, next) => {
+  let message = req.flash('error');
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
   }
-    exports.postReset = (req, res, next) => {
-      //비교적 안전한 임의의 값이 필요 -> crypto
-      //이걸 통과하면 버퍼를 가지게 되는데, 이 버퍼는 16진법을 저장함
-      //이걸 데이터베이스에 저장해야함, models/user (토큰 이름, 토큰 유효기간)
-      crypto.randomBytes(32, (err, buffer) => {
-        if(err) {
-          console.log(err);
-          return res.redirect('/reset');
-        }
-        const token = buffer.toString('hex');
-        User.findOne({email: req.body.email}).then(user => {
-          if (!user) {
-            req.flash('error', '계정과 일치하는 이메일 주소를 찾지 못했습니다.');
-            return res.redirect('/reset');
-          }
-          user.resetToken = token;
-          user.resetTokenExpiration = Date.now() + 3600000;
-          user.save();
-        })
-          .then(result => {
+  res.render('auth/reset', {
+    path: '/reset',
+    pageTitle: '패스워드 찾기',
+    errorMessage: message
+  });
+}
+exports.postReset = (req, res, next) => {
+  //비교적 안전한 임의의 값이 필요 -> crypto
+  //이걸 통과하면 버퍼를 가지게 되는데, 이 버퍼는 16진법을 저장함
+  //이걸 데이터베이스에 저장해야함, models/user (토큰 이름, 토큰 유효기간)
+  crypto.randomBytes(32, (err, buffer) => {
+    if(err) {
+      console.log(err);
+      return res.redirect('/reset');
+    }
+    const token = buffer.toString('hex');
+    User.findOne({email: req.body.email}).then(user => {
+      if (!user) {
+        req.flash('error', '계정과 일치하는 이메일 주소를 찾지 못했습니다.');
+        return res.redirect('/reset');
+      }
+      user.resetToken = token;
+      user.resetTokenExpiration = Date.now() + 3600000;
+      user.save();
+    })
+      .then(result => {
 
-            const mailOptions = {
-              from: process.env.MAIL_ID,
-              to: req.body.email,
-              subject: "비밀번호 찾기",
-              html: `<h1>비밀번호 찾기</h1>
+        const mailOptions = {
+          from: process.env.MAIL_ID,
+          to: req.body.email,
+          subject: "비밀번호 찾기",
+          html: `<h1>비밀번호 찾기</h1>
           <div>
             비밀번호 찾기 안내 메일입니다. 아래의 링크를 클릭하여 비밀번호를 초기화할 수 있습니다.
             <a href='http://127.0.0.1:3000/reset/${token}'>비밀번호 초기화 하기</a>
           </div>`,
-              text: "인증메일입니다.",
-            };
-            res.redirect('/')
-            transporter.sendMail(mailOptions);
+          text: "인증메일입니다.",
+        };
+        res.redirect('/')
+        transporter.sendMail(mailOptions);
 
-          })
-          .catch(err => {
-          console.log(err)
-        })
-      });
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  });
 };
 
 exports.getNewPassword = (req, res, next) => {
@@ -261,17 +261,17 @@ exports.getNewPassword = (req, res, next) => {
       } else {
         message = null;
       }
-    res.render('auth/new-password', {
-      path: '/new-password',
-      pageTitle: '비밀번호 초기화',
-      errorMessage: message,
-      userId: user._id.toString(),
-      passwordToken: token
-    });
-  })
+      res.render('auth/new-password', {
+        path: '/new-password',
+        pageTitle: '비밀번호 초기화',
+        errorMessage: message,
+        userId: user._id.toString(),
+        passwordToken: token
+      });
+    })
     .catch(err => {
-    console.log(err);
-  });
+      console.log(err);
+    });
 };
 
 exports.postNewPassword = (req, res, next) => {

@@ -10,6 +10,7 @@ router.get('/login', authController.getLogin);
 
 router.get('/signup', authController.getSignup);
 
+<<<<<<< HEAD
 router.post(
   '/login',
   [
@@ -62,11 +63,17 @@ router.post(
   ],
   authController.postSignup
 );
+=======
+router.post('/login', authController.postLogin);
+>>>>>>> d1f94ccd1ff26aeb6ba94bd4a0c5755feb157a58
+
+router.post('/signup', authController.postSignup);
 
 router.post('/logout', authController.postLogout);
 
 router.get('/reset', authController.getReset);
 
+<<<<<<< HEAD
 router.post('/reset', authController.postReset);
 
 router.get('/reset/:token', authController.getNewPassword);
@@ -74,3 +81,6 @@ router.get('/reset/:token', authController.getNewPassword);
 router.post('/new-password', authController.postNewPassword);
 
 module.exports = router;
+=======
+module.exports = router;
+>>>>>>> d1f94ccd1ff26aeb6ba94bd4a0c5755feb157a58

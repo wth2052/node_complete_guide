@@ -5,6 +5,13 @@ const Schema = mongoose.Schema
 //JavaScript객체를 이 생성자로 전달한다.
 const userSchema = new Schema({
   email: {
+<<<<<<< HEAD
+=======
+    type: String,
+    required: true
+  },
+  password: {
+>>>>>>> d1f94ccd1ff26aeb6ba94bd4a0c5755feb157a58
     type: String,
     required: true
   },
