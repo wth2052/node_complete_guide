@@ -12,7 +12,7 @@
         <% } %>
         <form class="login-form" action="/login" method="POST">
             <div class="form-control">
-                <label for="email">E-Mail</label>
+                <label for="email">이메일 주소</label>
                 <input 
                     class="<%= validationErrors.find(e => e.param === 'email') ? 'invalid' : '' %>"
                     type="email" 
@@ -21,7 +21,7 @@
                     value="<%= oldInput.email %>">
             </div>
             <div class="form-control">
-                <label for="password">Password</label>
+                <label for="password">비밀번호</label>
                 <input 
                     class="<%= validationErrors.find(e => e.param === 'password') ? 'invalid' : '' %>"
                     type="password" 
