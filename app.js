@@ -66,10 +66,14 @@ app.use((req, res, next) => {
   //여기서 Mongoose 모델인 user를 저장하기 때문
   User.findById(req.session.user._id)
     .then(user => {
+      //undefined 방지
+      if (!user) {
+        return next();
+      }
       req.user = user;
       next();
     })
-    .catch(err => console.log(err));
+    .catch(err => throw new Error(err));
 })
 app.use((req, res, next) => {
   //렌더링될 뷰에만 존재하므로 locals
