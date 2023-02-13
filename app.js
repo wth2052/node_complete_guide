@@ -7,6 +7,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf =  require('csurf');
 const flash = require('connect-flash');
+const multer = require('multer');
 //아래 소스코드는 허가되지 않은 인증서를 거부하지 않겠다는 의미
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 mongoose.set('strictQuery', true)
@@ -15,7 +16,7 @@ const errorController = require('./controllers/error');
 const User = require('./models/user');
 //나중에 다시 사용할 상수 값 = 전부 대문자
 const MONGODB_URI =
-  'mongodb+srv://root:3d720307@cluster0.w2bgbed.mongodb.net/shop '
+  'mongodb+srv://root:3d720307@cluster0.w2bgbed.mongodb.net/shop'
 const app = express();
 const store = new MongoDBStore({
   uri: MONGODB_URI,
@@ -23,6 +24,23 @@ const store = new MongoDBStore({
 });
 const csrfProtection = csrf();
 
+const fileStorage = multer.diskStorage({
+  //파일의 저장 위치와 이름을 어떻게 지정할지
+  destination: (req, file, cb) => {
+    cb(null, 'images');
+  },
+  filename: (req,file,cb) => {
+    cb(null, new Date().toISOString() + '-' + file.originalname);
+  }
+})
+const fileFilter = (req, file, cb) => {
+  //저장하고싶다 true 하기싫다 false
+  if(file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+}
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
@@ -31,7 +49,9 @@ const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(multer({storage: fileStorage, fileFilter: fileFilter }).single('image'))
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/images',express.static(path.join(__dirname, 'images')));
 app.use(
   session({
     secret: 'my secret',
@@ -81,14 +101,15 @@ app.use(errorController.get404);
 //다른 모든 미들웨어를 건너뛰어 오류 처리 미들웨어로 빠지게 함
 app.use((error, req, res, next) => {
   // res.status(error.httpStatusCode).render(...);
-  res.redirect('/500');
+  // res.redirect('/500');
+  console.log(req.session.isLoggedIn)
   res.status(500).render('500', {
-    pateTitle: '에러 발생!',
+    pageTitle: 'Error!',
     path: '/500',
     isAuthenticated: req.session.isLoggedIn
-  })
-});
+  });
 
+});
 
 mongoose
   .connect(MONGODB_URI)
