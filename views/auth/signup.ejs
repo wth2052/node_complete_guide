@@ -10,18 +10,33 @@
     <% if (errorMessage) { %>
         <div class="user-message user-message--error"><%= errorMessage %></div>
     <% } %>
-    <form class="login-form" action="/signup" method="POST">
+    <form class="login-form" action="/signup" method="POST" novalidate>
         <div class="form-control">
             <label for="email">이메일 주소</label>
-            <input type="email" name="email" id="email">
+            <input
+                    class="<%= validationErrors.find(e => e.param === 'email') ? 'invalid' : '' %>"
+                    type="email"
+                    name="email"
+                    id="email"
+                    value="<%= oldInput.email %>">
         </div>
         <div class="form-control">
             <label for="password">비밀번호</label>
-            <input type="password" name="password" id="password">
+            <input
+                    class="<%= validationErrors.find(e => e.param === 'password') ? 'invalid' : '' %>"
+                    type="password"
+                    name="password"
+                    id="password"
+                    value="<%= oldInput.password %>">
         </div>
         <div class="form-control">
             <label for="confirmPassword">비밀번호 확인</label>
-            <input type="password" name="confirmPassword" id="confirmPassword">
+            <input
+                    class="<%= validationErrors.find(e => e.param === 'confirmPassword') ? 'invalid' : '' %>"
+                    type="password"
+                    name="confirmPassword"
+                    id="confirmPassword"
+                    value="<%= oldInput.confirmPassword %>">
         </div>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <button class="btn" type="submit">회원가입</button>

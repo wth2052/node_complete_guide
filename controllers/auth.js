@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs")
 const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const sendgridTransport = require('nodemailer-sendgrid-transport')
+const { validationResult } = require('express-validator/check')
 const User = require("../models/user");
 const dotenv = require('dotenv');
 dotenv.config();
@@ -37,37 +38,65 @@ exports.getLogin = (req, res, next) => {
   res.render('auth/login', {
     path: '/login',
     pageTitle: '로그인',
-    errorMessage: message
+    errorMessage: message,
+    oldInput: {
+      email: '',
+      password: ''
+    },
+    validationErrors: []
   });
 };
 
-
-//isLoggedIn에 정보를 저장하고 있어도
-//Login 버튼을 클릭하면 요청에 저장됨
-//이 정보를 다른 라우트에 대한 요청으로 사용하여
-//네비게이션에 쓰이는 프론트엔드 필드인 isAuthenticated에 전달함
-//민감한데이터는 쿠키에 저장하면 안됨
-
-//응답을 보낼때 리디렉션을 통해 응답을 보내니
-//해당 요청이 끝남.
-//요청을 받고 -> 응답을 보내면 그대로 끝
-//데이터가 존재하지 않음
-//요청이 가면 응답을 보낸후 데이터가 손실되기에
-//다른 페이지를 방문하면 (로그인 후 redirect getIndex에 도달)
-//=> redirect되면 새로운 요청을 만든다, = 완전히 다른 요청을 다룬다
-//많은 사용자의 요청간 연관되지 않는것이 맞다.
-//(보면 안되는 데이터까지 보여줄 수도 있기때문.)
-//따라서 요청이 한 사용자로부터 비롯되었다 해도 요청이 따로 처리된다.
+exports.getSignup = (req, res, next) => {
+  let message = req.flash('error');
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  res.render('auth/signup', {
+    path: '/signup',
+    pageTitle: '회원가입',
+    errorMessage: message,
+    oldInput: {
+      email: '',
+      password: '',
+      confirmPassword: ''
+    },
+    validationErrors: []
+  });
+};
 
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
 
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render('auth/login', {
+      path: '/login',
+      pageTitle: 'Login',
+      errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email: email,
+        password: password
+      },
+      validationErrors: errors.array()
+    });
+  }
   User.findOne({ email: email })
     .then(user => {
       if (!user) {
-        req.flash('error', '이메일이나 패스워드가 일치하지 않습니다.');
-        return res.redirect('/login');
+        return res.status(422).render('auth/login', {
+          path: '/login',
+          pageTitle: 'Login',
+          errorMessage: '비밀번호 혹은 아이디가 일치하지 않습니다.',
+          oldInput: {
+            email: email,
+            password: password
+          },
+          validationErrors: []
+        });
       }
       //이 두 값이랑 확인해서
       bcrypt
@@ -83,10 +112,18 @@ exports.postLogin = (req, res, next) => {
               res.redirect('/');
             });
           }
-          req.flash('error', '이메일이나 패스워드가 일치하지 않습니다.');
           //이 줄은 다른 함수의 콜백에 속해있으므로 이 줄 이후에는 이줄에 도달할 수 없어
           // 여기에서 then을 반환할 필요가 없다
-          res.redirect('/login');
+          return res.status(422).render('auth/login', {
+            path: '/login',
+            pageTitle: 'Login',
+            errorMessage: '이메일 혹은 비밀번호가 일치하지 않습니다.',
+            oldInput: {
+              email: email,
+              password: password
+            },
+            validationErrors: []
+          });
         })
         .catch(err => {
           console.log(err);
@@ -97,24 +134,28 @@ exports.postLogin = (req, res, next) => {
 };
 
 
-exports.getSignup = (req, res, next) => {
-  let message = req.flash('error');
-  if (message.length > 0) {
-    message = message[0];
-  } else {
-    message = null;
-  }
-  res.render('auth/signup', {
-    path: '/signup',
-    pageTitle: '회원가입',
-    errorMessage: message
-  });
-};
 
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
   const confirmPassword = req.body.confirmPassword;
+  const errors = validationResult(req);
+  //뭐가 문제였는지 배열로 나옴
+  console.log(errors.array());
+  if (!errors.isEmpty()) {
+    return res.status(422).render('auth/signup', {
+      path: '/signup',
+      pageTitle: '회원가입',
+      errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email: email,
+        password: password,
+        confirmPassword: req.body.confirmPassword
+      },
+      validationErrors: errors.array()
+    });
+
+  }
   const mailOptions = {
     from: process.env.MAIL_ID,
     to: email,
@@ -126,17 +167,7 @@ exports.postSignup = (req, res, next) => {
           </div>`,
     text: "인증메일입니다.",
   };
-
-  User.findOne({ email: email })
-    .then(userDoc => {
-      if (userDoc) {
-        req.flash(
-          'error',
-          '이메일주소가 이미 사용중입니다 다른 이메일주소를 입력해주세요.'
-        );
-        return res.redirect('/signup');
-      }
-      return bcrypt
+      bcrypt
         .hash(password, 12)
         .then(hashedPassword => {
           const user = new User({
@@ -152,10 +183,6 @@ exports.postSignup = (req, res, next) => {
           console.log(info)
           return info
         })
-        .catch(err => {
-          console.log(err);
-        });
-    })
     .catch(err => {
       console.log(err);
     });
