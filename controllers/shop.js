@@ -1,5 +1,11 @@
 const fs = require('fs');
 const path = require('path')
+require('dotenv').config();
+const env = process.env;
+const stripe = require('stripe')('sk_test_51MbMrxAMMBg8WOo7UKca9tP65l44m7hNVTxq2MHt85MtLcuAZFbUxtWIHus7DyRVTHka5tI4yxmYKhOBpPXDeN8x00te8HKYay');
+
+
+
 
 const Product = require('../models/product');
 const Order = require('../models/order');
@@ -144,12 +150,11 @@ exports.getCart = (req, res, next) => {
     .execPopulate()
     .then(user => {
       console.log(user.cart.items)
-      const products = user.cart.items
+      let products = user.cart.items
       res.render('shop/cart', {
         path: '/cart',
         pageTitle: '내 장바구니',
         products: products,
-
       });
     })
     .catch(err => {
@@ -186,7 +191,86 @@ exports.postCartDeleteProduct = (req, res, next) => {
   //hidden input으로 가격을 백엔드로 전달가능하지만 이게 더 깔끔한 방법.
   //요청을 통해 ID를 검색하면 백엔드에서 모든 데이터를 검색해야 하기 때문.
 };
+//★★★★★★★★★★★★★★★★★
+//이제 이 친구를 어떻게 객체를 쓰지않고 넘겨야 내가 원하는 아이템들의 합계와
+//정보를 출력할 수 있을까..?
+//2023.02.14 11:21 PM
+exports.getCheckout = (req, res, next) => {
+  let products;
+  let total = 0;
+  req.user
+    .populate('cart.items.productId')
+    .execPopulate()
+    .then(user => {
+      products = user.cart.items;
+      total = 0;
+      products.forEach(p => {
+        total += p.quantity * p.productId.price;
+      });
+      //stripe의 세션키 발급
+      return stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        line_items: [{
+              price_data: {
+                currency: 'usd',
+                unit_amount: 2000,
+              product_data: {
+                name: 'Cool Pokemon',
+                description: 'Cool Pokemon',
+              }
+              },
+            quantity: 1,
+        }],
+        success_url: req.protocol + '://' + req.get('host') + '/checkout/success', // => http://localhost:3000
+        cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel'
+      });
+    })
+    .then(session => {
+      res.render('shop/checkout', {
+        path: '/checkout',
+        pageTitle: '결제',
+        products: products,
+        totalSum: total,
+        sessionId: session.id
+      });
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+}
 
+exports.getCheckoutSuccess = (req, res, next) => {
+  req.user
+    .populate('cart.items.productId')
+    .execPopulate()
+    .then(user => {
+      const products = user.cart.items.map(i => {
+        return { quantity: i.quantity, product: { ...i.productId._doc } };
+      });
+      const order = new Order({
+        user: {
+          email: req.user.email,
+          userId: req.user
+        },
+        products: products
+      });
+      return order.save();
+    })
+    .then(result => {
+      return req.user.clearCart();
+    })
+    .then(() => {
+      res.redirect('/orders');
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
 
 exports.postOrder = (req, res, next) => {
   req.user
@@ -257,7 +341,7 @@ exports.getInvoice = (req, res, next) => {
     )
     pdfDoc.pipe(fs.createWriteStream(invoicePath));
     pdfDoc.pipe(res);
-    pdfDoc.fontSize(26).text('주문서', {
+    pdfDoc.fontSize(26).text('Invoice', {
       underline: true,
     });
     pdfDoc.text('--------------------------------');
@@ -267,7 +351,7 @@ exports.getInvoice = (req, res, next) => {
       pdfDoc.fontSize(14).text(prod.product.title + ' - ' + prod.quantity + ' x ' + '$' + prod.product.price);
     })
     pdfDoc.text('----');
-    pdfDoc.fontSize(20).text('총 가격 : $' + totalPrice);
+    pdfDoc.fontSize(20).text('Total : $' + totalPrice);
     pdfDoc.end();
     //아래와 같이 읽게 시키는건 어느 시점에 컴퓨터 메모리는 overflow될것
     //--> 스트리밍 데이터가 좋다

@@ -10,7 +10,7 @@
             <% products.forEach(p => { %>
                 <li class="cart__item">
                     <h1><%= p.productId.title %></h1>
-                    <h2>수량: <%= p.quantity %></h2>
+                    <h2>갯수: <%= p.quantity %></h2>
                     <form action="/cart-delete-item" method="POST">
                         <input type="hidden" value="<%= p.productId._id %>" name="productId">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -21,14 +21,14 @@
         </ul>
         <hr>
         <div class="centered">
-            <form action="/create-order" method="POST">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button type="submit" class="btn">주문하기</button>
-            </form>
+            <!--<form action="/create-order" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" class="btn">Order Now!</button>
+                    </form>-->
+            <a class="btn" href="/checkout">지금 주문하기</a>
         </div>
-
     <% } else { %>
-        <h1>장바구니가 비었습니다!</h1>
+        <h1>장바구니가 비어있습니다.</h1>
     <% } %>
 </main>
 <%- include('../includes/end.ejs') %>
