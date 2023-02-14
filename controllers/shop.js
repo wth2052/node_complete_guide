@@ -1,5 +1,8 @@
+const fs = require('fs');
+const path = require('path')
 const Product = require('../models/product');
 const Order = require('../models/order');
+const PDFDocument = require('pdfkit')
 //제품을 찾은 후
 //장바구니를 정리하는 과정을
 //주기별로 진행하기도 함. (애플리케이션에서)
@@ -172,4 +175,58 @@ exports.getOrders = (req, res, next) => {
       error.httpStatusCode = 500;
       return next(error);
     });
+};
+
+
+exports.getInvoice = (req, res, next) => {
+  const orderId = req.params.orderId;
+  Order.findById(orderId).then(order => {
+    if (!order) {
+      return next(new Error('주문을 찾을 수 없습니다'));
+    }
+    if (order.user.userId.toString() !== req.user._id.toString()) {
+      return next(new Error('사용자가 일치하는 주문만 볼 수 있습니다.'));
+    }
+    const invoiceName = 'invoice-' + orderId + '.pdf';
+    const invoicePath = path.join('data', 'invoices', invoiceName);
+
+    const pdfDoc = new PDFDocument();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      'inline; filename="' + invoiceName + '"'
+    )
+    pdfDoc.pipe(fs.createWriteStream(invoicePath));
+    pdfDoc.pipe(res);
+    pdfDoc.fontSize(26).text('주문서', {
+      underline: true,
+    });
+    pdfDoc.text('--------------------------------');
+    let totalPrice = 0;
+    order.products.forEach(prod => {
+      totalPrice = totalPrice + prod.quantity * prod.product.price;
+      pdfDoc.fontSize(14).text(prod.product.title + ' - ' + prod.quantity + ' x ' + '$' + prod.product.price);
+    })
+    pdfDoc.text('----');
+    pdfDoc.fontSize(20).text('총 가격 : $' + totalPrice);
+    pdfDoc.end();
+    //아래와 같이 읽게 시키는건 어느 시점에 컴퓨터 메모리는 overflow될것
+    //--> 스트리밍 데이터가 좋다
+    // fs.readFile(invoicePath, (err, data) => {
+    //   if (err) {
+    //     return next(err);
+    //   }
+    //   res.setHeader('Content-Type', 'application/pdf');
+    //   res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"');
+    //   res.send(data);
+    //아래와 같이 스트리밍 방식으로 데이터를 제공할 시 overflow를 걱정하지 않아도 된다.
+    // 큰 파일을 제공할 때 권장하는 방법.
+    // const file = fs.createReadStream(invoicePath);
+    //
+    // //읽어들인 데이터를
+    // //res로 전달, = res = 쓰기가능한 객체
+    // //읽기 가능한 스트림을 사용해 출력값을 쓰기 스트림으로 전달
+    // file.pipe(res);
+  })
+    .catch(err => next(err));
 };

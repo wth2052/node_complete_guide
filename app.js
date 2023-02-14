@@ -1,5 +1,4 @@
 const path = require('path');
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -8,6 +7,7 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf =  require('csurf');
 const flash = require('connect-flash');
 const multer = require('multer');
+
 //아래 소스코드는 허가되지 않은 인증서를 거부하지 않겠다는 의미
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 mongoose.set('strictQuery', true)
@@ -60,8 +60,10 @@ app.use(
     store: store
   })
 );
+
 app.use(csrfProtection);
 app.use(flash());
+
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
   res.locals.csrfToken = req.csrfToken();
@@ -69,6 +71,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
+
   if (!req.session.user) {
     return next();
   }
@@ -88,7 +91,6 @@ app.use((req, res, next) => {
 });
 
 
-
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
@@ -102,15 +104,12 @@ app.use(errorController.get404);
 app.use((error, req, res, next) => {
   // res.status(error.httpStatusCode).render(...);
   // res.redirect('/500');
-  console.log(req.session.isLoggedIn)
   res.status(500).render('500', {
     pageTitle: 'Error!',
     path: '/500',
     isAuthenticated: req.session.isLoggedIn
   });
-
 });
-
 mongoose
   .connect(MONGODB_URI)
   .then(result => {
