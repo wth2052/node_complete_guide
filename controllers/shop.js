@@ -1,8 +1,11 @@
 const fs = require('fs');
 const path = require('path')
+
 const Product = require('../models/product');
 const Order = require('../models/order');
 const PDFDocument = require('pdfkit')
+//얼마나 많이 보여줄껀지?
+const ITEMS_PER_PAGE = 2;
 //제품을 찾은 후
 //장바구니를 정리하는 과정을
 //주기별로 진행하기도 함. (애플리케이션에서)
@@ -23,18 +26,36 @@ const PDFDocument = require('pdfkit')
 
 
 exports.getProducts = (req, res, next) => {
-  //cursor대신 products를 반환 \
-  //  Product.find().cursor().eachAsync() 등도 가능
+  const page = +req.query.page || 1;
+  let totalItems;
+  //커서를 이용하여 필요한 항목만 검색할 수 있다.
   Product.find()
+    //모든 데이터를 받지 않고 숫자만 세어 데이터를 받는것 보다 빠름!!
+    .countDocuments()
+    .then(numProducts => {
+      totalItems = numProducts;
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then(products => {
-      console.log(products)
       res.render('shop/product-list', {
         prods: products,
-        pageTitle: '전체 포켓몬',
+        pageTitle: '포켓몬 리스트',
         path: '/products',
-
+        currentPage: page,
+        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+        hasPreviousPage: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
       });
     })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.getProduct = (req, res, next) => {
@@ -58,19 +79,57 @@ exports.getProduct = (req, res, next) => {
 
 
 exports.getIndex = (req, res, next) => {
-  //몽구스는 find를 쓰면 배열을 출력한다.
-  //많은 양의 쿼리를 사용시 cursor() 검색하는 데이터셋을 제한해야한다.
-  // = 페이지네이션
+  //page=우리가 지은 페이지 이름, 상수에 저장
+  //올바른 값을 가지던, 1이여야함
+  const page = +req.query.page || 1;
+  let totalItems;
+  //페이지마다 얼마나 많은 페이지가 보여야 하는가? 맨위 상수에 저장 끝.
+  //이제 DB로부터 검색하는 데이터의 양을 조절해야함
+  //이전 페이지 번호
+  // 보여줄 자료 구하기
+  //이전 페이지 번호 x 몇개나 보여줄껀지 수
+  //페이지 2에 있다면 1을 뺀 1에 곱하기 2 만큼 (처음 두 포켓몬만큼 생략함.)
+  // -> skip 메서드
+  //이때 생략 뿐 아니라
+  //받게 되는 항목의 양도 제한해야한다.
+  // -> 이전 페이지의 항목을 생략하고 현재 페이지에 보여줄 만큼의
+  // 항목만 가져올수 있기 때문이다.
+  // -> limit 메서드
+  //https://sequelize.org/docs/v6/core-concepts/model-querying-basics/ 시퀄라이즈 사용시
+
   Product.find()
+    .countDocuments()
+    .then(numProducts => {
+      totalItems = numProducts;
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then(products => {
-      console.log(products)
       res.render('shop/index', {
         prods: products,
         pageTitle: 'Shop',
         path: '/',
-
-      })
-    })
+        currentPage: page,
+        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+        hasPreviousPage: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
+      });
+      //currentPage: 현재 활성화된 페이지
+      //hasNextPage: 다음 페이지가 있는지?
+      // 현재 페이지에 페이지당 항목을 곱한 값보다 클때 = 다음 페이지가 있음을 의미
+      // 10개의 포켓몬이 있고 현재 페이지 4에 있다면
+      // 2 * 4 8개의 제품을 보았음을 의미, 다음 페이지가 있다.
+      // hasPreviousPage = 이전 페이지, 현재 페이지가 1보다 큰지 확인한다.
+      // 1보다 크다? true면 이전 페이지가 표시되고
+      // 작으면 1페이지라는 얘기기때문에 표시되지 않음.
+      // nextPage 다음 페이지
+      // PreviousPage 이전 페이지
+      //  lastPage 마지막 페이지, 열 한개의 제품이 있고 페이지당 두개의 제품을 보여준다면
+      // 계산값이 5.5인데, 반개만 보여줄수 없으므로 반올림하여 6을 반환시킴.
+  })
     .catch(err => {
       const error = new Error(err);
       error.httpStatusCode = 500;
