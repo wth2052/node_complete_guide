@@ -7,7 +7,9 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf =  require('csurf');
 const flash = require('connect-flash');
 const multer = require('multer');
-
+const dotenv = require('dotenv');
+dotenv.config();
+const env = process.env
 //아래 소스코드는 허가되지 않은 인증서를 거부하지 않겠다는 의미
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 mongoose.set('strictQuery', true)
@@ -16,7 +18,7 @@ const errorController = require('./controllers/error');
 const User = require('./models/user');
 //나중에 다시 사용할 상수 값 = 전부 대문자
 const MONGODB_URI =
-  'mongodb+srv://root:3d720307@cluster0.w2bgbed.mongodb.net/shop'
+  env.MONGODB_URL
 const app = express();
 const store = new MongoDBStore({
   uri: MONGODB_URI,
