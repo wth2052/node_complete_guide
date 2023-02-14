@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const fileHelper = require('../util/file')
 const { validationResult } = require('express-validator/check');
 
 const Product = require('../models/product');
@@ -40,7 +40,7 @@ exports.postAddProduct = (req, res, next) => {
   if (!errors.isEmpty()) {
     console.log(errors.array());
     return res.status(422).render('admin/edit-product', {
-      pageTitle: 'Add Product',
+      pageTitle: '제품 추가',
       path: '/admin/add-product',
       editing: false,
       hasError: true,
@@ -142,6 +142,8 @@ exports.postEditProduct = (req, res, next) => {
       product.price = updatedPrice;
       product.description = updatedDesc;
       if (image) {
+        //발사 후 망각 방식 (F&F) 결과에 신경쓰지 않음
+        fileHelper.deleteFile(product.imageUrl);
         product.imageUrl = image.path;
       }
       return product.save().then(result => {
@@ -178,14 +180,16 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.deleteOne({ _id: prodId, userId: req.user._id })
-    .then(() => {
-      console.log('포켓몬이 정상적으로 삭제되었습니다.');
-      res.redirect('/admin/products');
-    })
-    .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
-    });
+  Product.findById(prodId).then(product => {
+      if(!product) {
+        return next(new Error('포켓몬을 찾을 수 없습니다.'))
+      }
+    fileHelper.deleteFile(product.imageUrl);
+    return Product.deleteOne({ _id: prodId, userId: req.user._id })
+    }).then(() => {
+    console.log('포켓몬이 정상적으로 삭제되었습니다.');
+    res.redirect('/admin/products');
+  })
+    .catch(err => next(err))
+
 };
