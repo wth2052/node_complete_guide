@@ -41,6 +41,7 @@ exports.postAddProduct = (req, res, next) => {
     console.log(errors.array());
     return res.status(422).render('admin/edit-product', {
       pageTitle: '제품 추가',
+
       path: '/admin/add-product',
       editing: false,
       hasError: true,
@@ -144,6 +145,7 @@ exports.postEditProduct = (req, res, next) => {
       if (image) {
         //발사 후 망각 방식 (F&F) 결과에 신경쓰지 않음
         fileHelper.deleteFile(product.imageUrl);
+
         product.imageUrl = image.path;
       }
       return product.save().then(result => {

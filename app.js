@@ -7,6 +7,7 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf =  require('csurf');
 const flash = require('connect-flash');
 const multer = require('multer');
+
 const dotenv = require('dotenv');
 dotenv.config();
 const env = process.env
@@ -18,7 +19,9 @@ const errorController = require('./controllers/error');
 const User = require('./models/user');
 //나중에 다시 사용할 상수 값 = 전부 대문자
 const MONGODB_URI =
+
   env.MONGODB_URL
+
 const app = express();
 const store = new MongoDBStore({
   uri: MONGODB_URI,
@@ -106,12 +109,15 @@ app.use(errorController.get404);
 app.use((error, req, res, next) => {
   // res.status(error.httpStatusCode).render(...);
   // res.redirect('/500');
+
   res.status(500).render('500', {
     pageTitle: 'Error!',
     path: '/500',
     isAuthenticated: req.session.isLoggedIn
   });
+
 });
+
 mongoose
   .connect(MONGODB_URI)
   .then(result => {
